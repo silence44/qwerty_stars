@@ -49,10 +49,14 @@ function main(inputData) {
         );
     }
 
+
     for(var step = 0; step < maxSteps; step++) {
+
+        riders = sortRidersByPriority(riders);
+
         for(var j = 0; j < riders.length; j++) {
             var rider = riders[j];
-            if (rider.bookedBy === null) {
+            if (rider.bookedBy !== null) {
                 continue;
             }
 
@@ -66,9 +70,35 @@ function main(inputData) {
 
         reduceBookedStepForCars(cars, riders)
     }
+
+
+    console.log(collectResult(cars))
 }
 
+function sortRidersByPriority(riders) {
+    riders.sort(function (rider) {
+        var closestCar = findClosestCar(cars, [rider]);
 
+        if (closestCar) {
+            return rider.fromStep - calcDistanceFrom(closestCar, rider)
+        }
+
+        return 0
+
+    });
+}
+function collectResult(cars) {
+    return cars.map(function (car) {
+        if (!car.assignedRiders.length) {
+            return "0";
+        }
+        var ridesString = car.assignedRiders.join(" ");
+
+        var ridesAmountString = car.assignedRiders.length;
+
+        return ridesAmountString + " " + ridesString;
+    });
+}
 function reduceBookedStepForCars(cars, riders) {
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
@@ -115,14 +145,14 @@ function calcDistanceFrom(car, rider) {
 }
 
 function calcDistanceRide(rider) {
-    return Math.abs(rider.fromX - rider.toX) + Math.abs(car.fromX - rider.toY);
+    return Math.abs(rider.fromX - rider.toX) + Math.abs(rider.fromX - rider.toY);
 }
 
 
 function createNewCars(amount) {
     var cars = new Array(amount);
 
-    for (var i = 0; i < cars.length; i++) {
+    for (var i = 0; i < amount; i++) {
         cars[i] = new Car(i);
     }
 
