@@ -1,6 +1,3 @@
-/**
- * Created by denys on 01.03.18.
- */
 
 function Rider() {
     this.fromX = 0;
@@ -25,22 +22,28 @@ function Car() {
      return this;
 }
 
-function main() {
-    var maxSteps = 10;
+function main(inputData) {
+    var maxSteps = inputData[0][5];
+    var bonus = inputData[0][4];
+    var grid = createEmptyGrid(inputData[0][0], inputData[0][1]);
 
-    var bonus = 2;
-
-    var grid = createEmptyGrid(3, 4);
-
-    var cars = createNewCars(2);
+    var cars = createNewCars(inputData[0][2]);
 
     var riders = [];
 
-    riders[0] = createNewRider(0, 0, 2, 3, 2, 9);
-    riders[1] = createNewRider(1, 2, 1, 0, 0, 9);
-    riders[2] = createNewRider(2, 0, 2, 2, 0, 9);
+    for(var i = 1; i < inputData.length; i++) {
+        var inputRow = inputData[i];
+        riders[i - 1] = createNewRider(
+            inputRow[0],
+            inputRow[1],
+            inputRow[2],
+            inputRow[3],
+            inputRow[4],
+            inputRow[5]
+        );
+    }
 
-    console.log(cars)
+    console.log(riders);
 }
 
 function createNewCars(amount) {
@@ -74,4 +77,29 @@ function createEmptyGrid(rows, cols) {
 
     return grid;
 }
-main();
+
+function getFileDataByUrl () {
+    return new Promise(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "inputData/a_example.in");
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.send();
+
+    });
+}
+
+getFileDataByUrl().then(function(response) {
+    var rowsArr = response.split('\n'),
+        inputData = [];
+
+    console.log(rowsArr);
+
+    for (var i = 0; i < rowsArr.length; i++) {
+        inputData.push(rowsArr[i].split(' '))
+
+    }
+
+    main(inputData);
+});
