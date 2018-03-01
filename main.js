@@ -1,5 +1,6 @@
 
 function Rider() {
+    this.id = 0;
     this.fromX = 0;
     this.fromY = 0;
 
@@ -9,15 +10,19 @@ function Rider() {
     this.fromStep = 0;
     this.toStep = 0;
 
+    this.bookedBy = null;
+
     return this;
 }
 
-function Car() {
+function Car(id) {
+     this.id = id;
      this.x = 0;
      this.y = 0;
-     this.booked = false;
      this.bookedBy = null;
+     this.bookedStepsLeft = 0;
 
+     this.assignedRiders = [];
 
      return this;
 }
@@ -34,6 +39,7 @@ function main(inputData) {
     for(var i = 1; i < inputData.length; i++) {
         var inputRow = inputData[i];
         riders[i - 1] = createNewRider(
+            i - 1,
             inputRow[0],
             inputRow[1],
             inputRow[2],
@@ -43,21 +49,89 @@ function main(inputData) {
         );
     }
 
-    console.log(riders);
+    for(var step = 0; step < maxSteps; step++) {
+        for(var j = 0; j < riders.length; j++) {
+            var rider = riders[j];
+            if (rider.bookedBy === null) {
+                continue;
+            }
+
+            var closestCar = findClosestCar(cars, riders);
+
+            if (closestCar === null) {
+                continue;
+            }
+            assignCarToRider(closestCar, rider);
+        }
+
+        reduceBookedStepForCars(cars, riders)
+    }
 }
+
+
+function reduceBookedStepForCars(cars, riders) {
+    for (var i = 0; i < cars.length; i++) {
+        var car = cars[i];
+        if (car.bookedBy === null) {
+            continue;
+        }
+
+        car.bookedStepsLeft = car.bookedStepsLeft - 1;
+
+        if (car.bookedStepsLeft === 0) {
+           car.x = riders[car.bookedBy].toX;
+           car.y = riders[car.bookedBy].toY;
+           car.bookedBy = null;
+        }
+    }
+}
+function assignCarToRider(car, rider) {
+    car.assignedRiders.push(rider.id);
+    car.bookedBy = rider.id;
+    rider.bookedBy = car.id;
+
+    car.bookedStepsLeft = calcDistanceFrom(car, rider) + calcDistanceRide(rider);
+}
+
+
+function findClosestCar(cars, rider){
+
+    var filteredCars = cars.filter(function (car) {
+        return car.bookedBy === null
+    });
+
+    if (!filteredCars.length) {
+        return null
+    }
+
+    return cars.sort(function (previousValue, currentValue) {
+        return calcDistanceFrom(previousValue, rider) - calcDistanceFrom(currentValue, rider)
+    })[0];
+
+}
+
+function calcDistanceFrom(car, rider) {
+    return Math.abs(car.x - rider.fromX) + Math.abs(car.y - rider.fromY);
+}
+
+function calcDistanceRide(rider) {
+    return Math.abs(rider.fromX - rider.toX) + Math.abs(car.fromX - rider.toY);
+}
+
 
 function createNewCars(amount) {
     var cars = new Array(amount);
 
     for (var i = 0; i < cars.length; i++) {
-        cars[i] = new Car();
+        cars[i] = new Car(i);
     }
 
     return cars;
 }
 
-function createNewRider(fromX, fromY, toX, toY, fromStep, toStep) {
+function createNewRider(id, fromX, fromY, toX, toY, fromStep, toStep) {
     var rider = new Rider();
+    rider.id = id;
     rider.fromX = fromX;
     rider.fromY = fromY;
     rider.toX = toX;
