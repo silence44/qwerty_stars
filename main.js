@@ -52,7 +52,7 @@ function main(inputData) {
 
     for(var step = 0; step < maxSteps; step++) {
 
-        riders = sortRidersByPriority(riders);
+        riders = sortRidersByPriority(riders, cars);
 
         for(var j = 0; j < riders.length; j++) {
             var rider = riders[j];
@@ -75,8 +75,8 @@ function main(inputData) {
     console.log(collectResult(cars))
 }
 
-function sortRidersByPriority(riders) {
-    riders.sort(function (rider) {
+function sortRidersByPriority(riders, cars) {
+    return riders.sort(function (rider) {
         var closestCar = findClosestCar(cars, [rider]);
 
         if (closestCar) {
@@ -97,8 +97,9 @@ function collectResult(cars) {
         var ridesAmountString = car.assignedRiders.length;
 
         return ridesAmountString + " " + ridesString;
-    });
+    }).join("\n");
 }
+
 function reduceBookedStepForCars(cars, riders) {
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
@@ -119,8 +120,9 @@ function assignCarToRider(car, rider) {
     car.assignedRiders.push(rider.id);
     car.bookedBy = rider.id;
     rider.bookedBy = car.id;
-
-    car.bookedStepsLeft = calcDistanceFrom(car, rider) + calcDistanceRide(rider);
+    var a = calcDistanceFrom(car, rider);
+    var b = calcDistanceRide(rider);
+    car.bookedStepsLeft =  a + b;
 }
 
 
@@ -134,7 +136,7 @@ function findClosestCar(cars, rider){
         return null
     }
 
-    return cars.sort(function (previousValue, currentValue) {
+    return filteredCars.sort(function (previousValue, currentValue) {
         return calcDistanceFrom(previousValue, rider) - calcDistanceFrom(currentValue, rider)
     })[0];
 
@@ -145,7 +147,7 @@ function calcDistanceFrom(car, rider) {
 }
 
 function calcDistanceRide(rider) {
-    return Math.abs(rider.fromX - rider.toX) + Math.abs(rider.fromX - rider.toY);
+    return Math.abs(rider.fromX - rider.toX) + Math.abs(rider.fromY - rider.toY);
 }
 
 
