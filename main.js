@@ -28,6 +28,8 @@ function Car() {
 function main() {
     var maxSteps = 10;
 
+    var bonus = 2;
+
     var grid = createEmptyGrid(3, 4);
 
     var cars = createNewCars(2);
